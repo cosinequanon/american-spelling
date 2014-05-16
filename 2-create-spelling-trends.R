@@ -56,26 +56,29 @@ old_words <- select(changed_words, word = old, word_id, letter_change, change_ty
 id_words <- rbind(new_words, old_words)
 
 # filter out words that have a very low frequency
-infreq_words <- spelling_df %.%
+spelling_df %.%
     inner_join(id_words, by = 'word') %.%
     group_by(word_id) %.%
     summarise(total_word_ct = sum(match_ct)) %.%
     ungroup() %.%
-    filter(total_word_ct > 10^5)
+    filter(total_word_ct > 10^5) ->
+infreq_words 
 
-changed_word_ct <- spelling_df %.%
+spelling_df %.%
     inner_join(id_words, by = 'word') %.%
     group_by(word_id, year, letter_change, change_type) %.%
     summarise(word_ct = sum(match_ct)) %.%
-    ungroup()
+    ungroup() ->
+changed_word_ct 
 
-spelling_change <- changed_word_ct %.%
+changed_word_ct %.%
     select(word_id, year, word_ct) %.%
     semi_join(infreq_words, by = 'word_id') %.% # remove infrequent words
     inner_join(id_words, by = 'word_id') %.%
     inner_join(spelling_df, by = c('word', 'year')) %.%
     mutate(match_pct = match_ct / word_ct) %.%
     filter(word_type == 'American') %.%
-    select(word, year, match_pct, letter_change, change_type)
+    select(word, year, match_pct, letter_change, change_type) ->
+spelling_change 
 
 saveRDS(spelling_change, file = 'word-data/spelling_change.RDS')

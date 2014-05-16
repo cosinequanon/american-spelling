@@ -1,9 +1,9 @@
-#!/bin/bash -ev
+#!/bin/bash -ev 
 
 pushd ../ngram-data > /dev/null
 
 # Now that the data is downloaded, unzip the files.
-# gunzip *.gz
+gunzip *.gz
 
 # Make one large file so we can load it into a db.
 # While we are at it we can do some basic filtering that
